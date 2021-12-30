@@ -2,6 +2,8 @@
 A simplified version of Uniswap v1, allow you to swap ERC20 tokens, provide liquidity, and earn rewards.
 
 ![demo](imgs/demo.png)
+![f2](imgs/f2.png)
+
 ## Key features
 1. Swap Brother token with Eth
 2. Participate in the pool by adding liquidity
