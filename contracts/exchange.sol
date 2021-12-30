@@ -10,7 +10,7 @@ contract TokenExchange {
     using SafeMath for uint;
     address public admin;
 
-    address tokenAddr = 0x33823E46a60E215B68A6F5c8C1F560EA65584637;  // token contract address.
+    address tokenAddr = 0xF30cA2822eF07d511E9FE10EC5EF36B935e3fFcA;  // token contract address.
     BrotherCoin private token = BrotherCoin(tokenAddr);    
 
     // Liquidity pool for the exchange
@@ -213,7 +213,11 @@ contract TokenExchange {
         // ethWithdrawal = ethPool * (amountBurn / totalLiquidity)
         uint lp_token_burn = amountETH.mul(liquidity_amount).div(eth_reserves);
         liquidity_amount = liquidity_amount.sub(lp_token_burn);
-        liquidity_by_provider[msg.sender] = liquidity_by_provider[msg.sender].sub(liquidity_amount);
+        if (liquidity_amount > liquidity_by_provider[msg.sender]) {
+            liquidity_by_provider[msg.sender] = 0;
+        } else{
+            liquidity_by_provider[msg.sender] = liquidity_by_provider[msg.sender].sub(liquidity_amount);
+        }
 
         // Update records
         eth_reserves = eth_reserves.sub(amountETH);
@@ -312,6 +316,7 @@ contract TokenExchange {
         }
 
         require(amountTokens > 0);
+        require(amountTokens <= token.balanceOf(msg.sender), "msg sender does not have enough amountTokens tp swap");
 
         // calculate fees
         uint token_swap_fee = amountTokens.mul(swap_fee_numerator).div(swap_fee_denominator);
@@ -339,7 +344,7 @@ contract TokenExchange {
         token_reserves = new_token_reserves;
         eth_reserves = new_eth_reserves;
 
-        distribute_token_fee(token_swap_fee);
+        //distribute_token_fee(token_swap_fee);
 
         /***************************/
         // DO NOT MODIFY BELOW THIS LINE

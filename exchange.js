@@ -15,7 +15,7 @@ const token_symbol = 'BRO';
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // TODO: Paste your token contract address and ABI here:
-const token_address = '0x33823E46a60E215B68A6F5c8C1F560EA65584637';                   
+const token_address = '0xF30cA2822eF07d511E9FE10EC5EF36B935e3fFcA';                   
 const token_abi = [
 	{
 		"inputs": [],
@@ -294,7 +294,7 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0x7F4f6a7BdbEe097D6A3B1D1A001DDe66d245a5cF';    
+const exchange_address = '0x9136B54F239a5FcE162D15D88e42005707Fe5498';    
 const exchange_abi = [
 	{
 		"inputs": [],
@@ -724,7 +724,7 @@ async function init() {
         // All accounts start with 0 of your tokens. Thus, be sure to swap before adding liquidity.
         
         // test
-        //sanityCheck();
+        sanityCheck();
     }
 }
 
@@ -982,6 +982,9 @@ async function sanityCheck() {
 
 
 	console.log("\nTEST", "Swap Tokens for ETH");
+    var tt = await token_contract.methods.balanceOf(web3.eth.defaultAccount).call();
+    console.log("I have ", tt);
+    
 	await swapTokensForETH(100000, 10);
 	var eth_reserves_final = await exchange_contract.methods.eth_reserves().call();
 	var token_reserves_3 = await exchange_contract.methods.token_reserves().call();
