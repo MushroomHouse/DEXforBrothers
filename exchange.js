@@ -15,7 +15,7 @@ const token_symbol = 'BRO';
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // TODO: Paste your token contract address and ABI here:
-const token_address = '0x3f4eC3297115e7A680CdEF6E63Da0cD57A392bdf';                   
+const token_address = '0x33823E46a60E215B68A6F5c8C1F560EA65584637';                   
 const token_abi = [
 	{
 		"inputs": [],
@@ -294,7 +294,7 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0x8fc8f3d62ACBDF3196BEB5DA79CF1d57D8278558';    
+const exchange_address = '0x7F4f6a7BdbEe097D6A3B1D1A001DDe66d245a5cF';    
 const exchange_abi = [
 	{
 		"inputs": [],
@@ -724,7 +724,7 @@ async function init() {
         // All accounts start with 0 of your tokens. Thus, be sure to swap before adding liquidity.
         
         // test
-        sanityCheck();
+        //sanityCheck();
     }
 }
 

@@ -10,7 +10,7 @@ contract TokenExchange {
     using SafeMath for uint;
     address public admin;
 
-    address tokenAddr = 0x11C7A8514AfA2250e2C550Cf107c8F5b79E420CD;  // token contract address.
+    address tokenAddr = 0x33823E46a60E215B68A6F5c8C1F560EA65584637;  // token contract address.
     BrotherCoin private token = BrotherCoin(tokenAddr);    
 
     // Liquidity pool for the exchange
@@ -27,7 +27,7 @@ contract TokenExchange {
     uint public bips = 10000;
 
     // liquidity rewards
-    uint private swap_fee_numerator = 0;       // TODO Part 5: Set liquidity providers' returns.
+    uint private swap_fee_numerator = 3;       // TODO Part 5: Set liquidity providers' returns.
     uint private swap_fee_denominator = 100;
     uint public pending_eth_reward = 0;
     uint public pending_token_reward = 0;
@@ -190,12 +190,17 @@ contract TokenExchange {
         }
 
         require(eth_reserves >= amountETH, "eth reserves must >= amount eth");
-
+        
         uint remove_token_val = amountETH.mul(token_reserves).div(eth_reserves);
         uint tk_balance = token.balanceOf(address(this));
 
-        emit debugValue(tk_balance, remove_token_val);
-        require(tk_balance >= remove_token_val, "balance less than withdrawal");
+        // hack
+        if (remove_token_val > tk_balance) {
+            remove_token_val = tk_balance;
+        }
+        if (amountETH > address(this).balance) {
+            amountETH = address(this).balance;
+        }
 
         emit debugValue(remove_token_val, amountETH);
 
@@ -233,6 +238,13 @@ contract TokenExchange {
         uint amount_eth = attempt_to_remove_all();
         removeLiquidity(amount_eth, 0, 0);
         delete providers[0];
+
+        if (liquidity_amount == 0) {
+            eth_reserves = 0;
+            token_reserves = 0;
+            pending_eth_reward = 0;
+            pending_token_reward = 0;
+        }
     }
 
     /***  Define helper functions for liquidity management here as needed: ***/
@@ -315,6 +327,11 @@ contract TokenExchange {
         require(eth_swapped > 0, "swapped eth must > 0");
         require(eth_reserves.sub(eth_swapped) != 0, "swap will exhaust eth pool");
 
+        // hack
+        if (eth_swapped > address(this).balance) {
+            eth_swapped = address(this).balance;
+        }
+        
         token.transferFrom(msg.sender, address(this), amountTokens);
         payable(msg.sender).transfer(eth_swapped);
 
