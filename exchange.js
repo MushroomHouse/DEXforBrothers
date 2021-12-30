@@ -15,7 +15,7 @@ const token_symbol = 'BRO';
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // TODO: Paste your token contract address and ABI here:
-const token_address = '0xd27C7e83174D8f78283149573F603372F51A774f';                   
+const token_address = '0x11C7A8514AfA2250e2C550Cf107c8F5b79E420CD';                   
 const token_abi = [
 	{
 		"inputs": [],
@@ -294,26 +294,8 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0xb63b8D442a66033Da448f95df997F1Cc05f40BE4';    
+const exchange_address = '0x5ab086746942914940b2c2EB5675E82890ED52fA';    
 const exchange_abi = [
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "max_exchange_rate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "min_exchange_rate",
-				"type": "uint256"
-			}
-		],
-		"name": "addLiquidity",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -339,19 +321,6 @@ const exchange_abi = [
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amountTokens",
-				"type": "uint256"
-			}
-		],
-		"name": "createPool",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -369,36 +338,6 @@ const exchange_abi = [
 		],
 		"name": "Received",
 		"type": "event"
-	},
-	{
-		"inputs": [],
-		"name": "removeAllLiquidity",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amountETH",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "max_exchange_rate",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "min_exchange_rate",
-				"type": "uint256"
-			}
-		],
-		"name": "removeLiquidity",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
 	},
 	{
 		"anonymous": false,
@@ -445,43 +384,26 @@ const exchange_abi = [
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "max_exchange_rate",
-				"type": "uint256"
-			}
-		],
-		"name": "swapETHForTokens",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amountTokens",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "max_exchange_rate",
-				"type": "uint256"
-			}
-		],
-		"name": "swapTokensForETH",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
 		"stateMutability": "payable",
 		"type": "fallback"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "min_exchange_rate",
+				"type": "uint256"
+			}
+		],
+		"name": "addLiquidity",
+		"outputs": [],
 		"stateMutability": "payable",
-		"type": "receive"
+		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -494,6 +416,71 @@ const exchange_abi = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "attempt_to_remove_all",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "bips",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountTokens",
+				"type": "uint256"
+			}
+		],
+		"name": "createPool",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "fee",
+				"type": "uint256"
+			}
+		],
+		"name": "distribute_eth_fee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "fee",
+				"type": "uint256"
+			}
+		],
+		"name": "distribute_token_fee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -556,6 +543,32 @@ const exchange_abi = [
 	},
 	{
 		"inputs": [],
+		"name": "pending_eth_reward",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pending_token_reward",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "priceETH",
 		"outputs": [
 			{
@@ -581,6 +594,93 @@ const exchange_abi = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "providers",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "reinvest_fee_to_pool",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "removeAllLiquidity",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountETH",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "min_exchange_rate",
+				"type": "uint256"
+			}
+		],
+		"name": "removeLiquidity",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			}
+		],
+		"name": "swapETHForTokens",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountTokens",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "max_exchange_rate",
+				"type": "uint256"
+			}
+		],
+		"name": "swapTokensForETH",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "token_reserves",
 		"outputs": [
@@ -592,6 +692,10 @@ const exchange_abi = [
 		],
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
 	}
 ];            
 const exchange_contract = new web3.eth.Contract(exchange_abi, exchange_address);
@@ -618,6 +722,9 @@ async function init() {
         await exchange_contract.methods.createPool(total_supply).send({from:web3.eth.defaultAccount, value : total_supply, gas : 3000000});
 
         // All accounts start with 0 of your tokens. Thus, be sure to swap before adding liquidity.
+        
+        // test
+        //sanityCheck();
     }
 }
 
@@ -887,4 +994,4 @@ async function sanityCheck() {
 }
 
 // Uncomment this to run when directly opening index.html
-sanityCheck();		
+//sanityCheck();		

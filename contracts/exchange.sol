@@ -10,7 +10,7 @@ contract TokenExchange {
     using SafeMath for uint;
     address public admin;
 
-    address tokenAddr = 0xd27C7e83174D8f78283149573F603372F51A774f;  // token contract address.
+    address tokenAddr = 0x11C7A8514AfA2250e2C550Cf107c8F5b79E420CD;  // token contract address.
     BrotherCoin private token = BrotherCoin(tokenAddr);    
 
     // Liquidity pool for the exchange
@@ -22,11 +22,16 @@ contract TokenExchange {
 
     uint public liquidity_amount = 0;
     mapping(address => uint) public liquidity_by_provider;
+    address[] public providers;
     
+    uint public bips = 10000;
+
     // liquidity rewards
-    uint private swap_fee_numerator = 0;       // TODO Part 5: Set liquidity providers' returns.
+    uint private swap_fee_numerator = 5;       // TODO Part 5: Set liquidity providers' returns.
     uint private swap_fee_denominator = 100;
-    
+    uint public pending_eth_reward = 0;
+    uint public pending_token_reward = 0;
+
     event AddLiquidity(address from, uint amount);
     event RemoveLiquidity(address to, uint amountETH, uint amountToken);
     event Received(address from, uint amountETH);
@@ -79,6 +84,7 @@ contract TokenExchange {
         //          can remove this liquidity
         liquidity_amount = msg.value;
         liquidity_by_provider[msg.sender] = msg.value;
+        providers.push(msg.sender);
     }
 
     // ============================================================
@@ -97,7 +103,7 @@ contract TokenExchange {
         /* HINTS:
             Calculate how much ETH is of equivalent worth based on the current exchange rate.
         */
-        return eth_reserves.mul(100).div(token_reserves);
+        return eth_reserves.mul(bips).div(token_reserves);
     }
 
     // Function priceETH: Calculate the price of ETH for your token.
@@ -111,7 +117,7 @@ contract TokenExchange {
         /* HINTS:
             Calculate how much of your token is of equivalent worth based on the current exchange rate.
         */
-        return token_reserves.mul(100).div(eth_reserves);
+        return token_reserves.mul(bips).div(eth_reserves);
     }
 
 
@@ -130,9 +136,10 @@ contract TokenExchange {
             Update token_reserves, eth_reserves, and k.
             Emit AddLiquidity event.
         */
+
         if (max_exchange_rate > 0 && min_exchange_rate > 0) {
-            require(priceToken() <= max_exchange_rate, "Max token slippage reached.");
-            require(priceToken() >= min_exchange_rate, "Min token slippage reached.");
+            require(priceToken().div(100) <= max_exchange_rate, "Max token slippage reached.");
+            require(priceToken().div(100) >= min_exchange_rate, "Min token slippage reached.");
         }
         
         uint eth_val = msg.value;
@@ -149,6 +156,9 @@ contract TokenExchange {
         // Use the formula from uniswap v1
         uint liquidity_mint = eth_val.mul(liquidity_amount).div(eth_reserves);
         liquidity_amount = liquidity_amount.add(liquidity_mint);
+        if (liquidity_by_provider[msg.sender] == 0) {
+            providers.push(msg.sender);
+        }
         liquidity_by_provider[msg.sender] = liquidity_by_provider[msg.sender].add(liquidity_mint);
 
         // Update records
@@ -173,6 +183,7 @@ contract TokenExchange {
             Update token_reserves, eth_reserves, and k.
             Emit RemoveLiquidity event.
         */
+
         if (max_exchange_rate > 0 && min_exchange_rate > 0) {
             require(priceToken() <= max_exchange_rate, "Max token slippage reached.");
             require(priceToken() >= min_exchange_rate, "Min token slippage reached.");
@@ -182,6 +193,8 @@ contract TokenExchange {
 
         uint remove_token_val = amountETH.mul(token_reserves).div(eth_reserves);
         uint tk_balance = token.balanceOf(address(this));
+
+        emit debugValue(tk_balance, remove_token_val);
         require(tk_balance >= remove_token_val, "balance less than withdrawal");
 
         emit debugValue(remove_token_val, amountETH);
@@ -217,13 +230,43 @@ contract TokenExchange {
             Call removeLiquidity().
         */
 
-        uint amount_burn = liquidity_by_provider[msg.sender];
-        uint amount_eth = eth_reserves.mul(amount_burn).div(liquidity_amount);
+        uint amount_eth = attempt_to_remove_all();
         removeLiquidity(amount_eth, 0, 0);
+        delete providers;
     }
 
     /***  Define helper functions for liquidity management here as needed: ***/
+    function attempt_to_remove_all() public returns(uint) {
+        uint amount_burn = liquidity_by_provider[msg.sender];
+        uint amount_eth = eth_reserves.mul(amount_burn).div(liquidity_amount);
 
+        uint own = address(this).balance;
+        if (amount_eth > own) {
+            // somehow contract own less eth, reset (hack)
+            amount_eth = own;
+        }
+
+        emit debugValue(amount_eth, own);
+
+        uint remove_token_val = amount_eth.mul(token_reserves).div(eth_reserves);
+        uint tk_balance = token.balanceOf(address(this));
+
+        emit debugValue(remove_token_val, tk_balance);
+
+        // use token max instead of eth max!
+        if (tk_balance < remove_token_val) {
+            remove_token_val = tk_balance;
+            amount_eth = remove_token_val.mul(bips).div(priceETH());
+        }
+
+        if (amount_eth > own) {
+            amount_eth = own;
+        }
+
+        emit debugValue(remove_token_val, amount_eth);
+
+        return amount_eth;
+    }
 
 
     /* ========================= Swap Functions =========================  */ 
@@ -253,10 +296,16 @@ contract TokenExchange {
         */
 
         if (max_exchange_rate > 0) {
-            require(priceETH() <= max_exchange_rate, "Max slippage reached.");
+            require(priceETH().div(100) <= max_exchange_rate, "Max slippage reached.");
         }
 
         require(amountTokens > 0);
+
+        // calculate fees
+        uint token_swap_fee = amountTokens.mul(swap_fee_numerator).div(swap_fee_denominator);
+
+        amountTokens = amountTokens.sub(token_swap_fee);
+        
         // (eth - out) * (token + in) = k
         uint new_token_reserves = token_reserves.add(amountTokens);
         uint new_eth_reserves = k.div(new_token_reserves);
@@ -272,6 +321,8 @@ contract TokenExchange {
         // Update reserve pools
         token_reserves = new_token_reserves;
         eth_reserves = new_eth_reserves;
+
+        distribute_token_fee(token_swap_fee);
 
         /***************************/
         // DO NOT MODIFY BELOW THIS LINE
@@ -314,14 +365,29 @@ contract TokenExchange {
                 Keep track of the liquidity fees to be added.
         */
 
+        /*
+        Swapping fees are immediately deposited into liquidity reserves. 
+        Since total reserves are increased without adding any additional share tokens, 
+        this increases that value of all share tokens equally. 
+        This functions as a payout to liquidity providers that can be collected by burning shares.
+
+        Since fees are added to liquidity pools, the invariant increases at the end of every trade. 
+        Within a single transaction, the invariant represents eth_pool * token_pool 
+        at the end of the previous transaction.
+        */
+
         if (max_exchange_rate > 0) {
-            require(priceToken() <= max_exchange_rate, "Max slippage reached.");
+            require(priceToken().div(100) <= max_exchange_rate, "Max slippage reached.");
         }
 
         // Calculate token swapped
         require(msg.value > 0);
 
-        uint eth_in = msg.value;
+        // calculate fees
+        uint eth_fee = msg.value.mul(swap_fee_numerator).div(swap_fee_denominator);
+
+        // reset eth_in = msg.value - fees
+        uint eth_in = msg.value.sub(eth_fee);
         // (eth + in) * (token - out) = k
         uint new_eth_reserves = eth_reserves.add(eth_in);
 
@@ -341,6 +407,8 @@ contract TokenExchange {
         token_reserves = new_token_reserves;
         eth_reserves = new_eth_reserves;
 
+        distribute_eth_fee(eth_fee);
+
         /**************************/
         // DO NOT MODIFY BELOW THIS LINE
         /* Check for x * y == k, assuming x and y are rounded to the nearest integer. */
@@ -358,5 +426,61 @@ contract TokenExchange {
 
     /***  Define helper functions for swaps here as needed: ***/
 
-}
+    function distribute_eth_fee(uint fee) public {
+        uint total = 0;
+        uint liquidity_fee_mint = fee.mul(liquidity_amount).div(eth_reserves);
+        for (uint i = 0; i < providers.length; i++) {
+            uint lp_token = liquidity_by_provider[providers[i]];
+            if (lp_token == 0) {
+                continue;
+            }
+            uint fee_lp_reward = liquidity_fee_mint.mul(lp_token).div(liquidity_amount);
+            liquidity_by_provider[providers[i]] = lp_token.add(fee_lp_reward);
 
+            emit debugValue(i, fee_lp_reward);
+            total = total.add(fee_lp_reward);
+        }
+        // require(total == liquidity_fee_mint, "total != liquidity_fee_mint");
+
+        liquidity_amount = liquidity_amount.add(liquidity_fee_mint);
+        pending_eth_reward = pending_eth_reward.add(fee);
+    }
+
+    function distribute_token_fee(uint fee) public {
+        uint liquidity_fee_mint = fee.mul(liquidity_amount).div(token_reserves);
+        for (uint i = 0; i < providers.length; i++) {
+            uint lp_token = liquidity_by_provider[providers[i]];
+            if (lp_token == 0) {
+                continue;
+            }
+            uint fee_lp_reward = liquidity_fee_mint.mul(lp_token).div(liquidity_amount);
+            emit debugValue(liquidity_fee_mint, fee_lp_reward);
+            liquidity_by_provider[providers[i]] = lp_token.add(fee_lp_reward);
+        }
+        liquidity_amount = liquidity_amount.add(liquidity_fee_mint);
+        pending_token_reward = pending_token_reward.add(fee);
+
+        reinvest_fee_to_pool();
+    }
+
+    function reinvest_fee_to_pool() public {
+        if (pending_eth_reward <= 0 || pending_token_reward <= 0) {
+            return;
+        }
+
+        // find eth-token pair
+        uint amount_eth = pending_eth_reward;
+        uint amount_token = amount_eth.mul(bips).div(priceToken());
+        if (amount_token > pending_token_reward) {
+            // not enough token to pair with eth
+            // re-calculate eth to match our token
+            amount_eth = amount_token.mul(bips).div(priceETH());
+        }
+
+        token_reserves = token_reserves.add(amount_token);
+        eth_reserves = eth_reserves.add(amount_eth);
+        k = token_reserves.mul(eth_reserves);
+        pending_token_reward = pending_token_reward.sub(amount_token);
+        pending_eth_reward = pending_eth_reward.sub(amount_eth);
+    }
+}
