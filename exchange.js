@@ -15,7 +15,7 @@ const token_symbol = 'BRO';
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // TODO: Paste your token contract address and ABI here:
-const token_address = '0x11C7A8514AfA2250e2C550Cf107c8F5b79E420CD';                   
+const token_address = '0x3f4eC3297115e7A680CdEF6E63Da0cD57A392bdf';                   
 const token_abi = [
 	{
 		"inputs": [],
@@ -294,7 +294,7 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0x5ab086746942914940b2c2EB5675E82890ED52fA';    
+const exchange_address = '0x8fc8f3d62ACBDF3196BEB5DA79CF1d57D8278558';    
 const exchange_abi = [
 	{
 		"inputs": [],
@@ -724,7 +724,7 @@ async function init() {
         // All accounts start with 0 of your tokens. Thus, be sure to swap before adding liquidity.
         
         // test
-        //sanityCheck();
+        sanityCheck();
     }
 }
 
@@ -787,7 +787,7 @@ async function removeLiquidity(amountEth, maxSlippagePct) {
 
 async function removeAllLiquidity(maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
-    //await token_contract.methods.approve(web3.eth.defaultAccount, 100000000000).send({from:web3.eth.defaultAccount});
+    await token_contract.methods.approve(exchange_address, 10000000000).send({from:web3.eth.defaultAccount});
     await exchange_contract.methods.removeAllLiquidity().send({from:web3.eth.defaultAccount, gas : 999999});
 }
 
@@ -801,7 +801,7 @@ async function swapTokensForETH(amountToken, maxSlippagePct) {
     }
     
     console.log("swapTokensForETH", poolState['eth_token_rate'], eth_max_rate);
-    await token_contract.methods.approve(exchange_address, amountToken).send({from:web3.eth.defaultAccount});
+    await token_contract.methods.approve(exchange_address, amountToken * 10).send({from:web3.eth.defaultAccount});
     await exchange_contract.methods.swapTokensForETH(amountToken, eth_max_rate).send(
         {from:web3.eth.defaultAccount, gas : 999999}
     );
@@ -940,6 +940,8 @@ function check(name, condition) {
 }
 
 async function sanityCheck() {
+    // Note: this only works when swap_fee_numerator is 0!
+    
 	var score = 0;
 	var accounts = await web3.eth.getAccounts();
 	web3.eth.defaultAccount = accounts[0];

@@ -27,7 +27,7 @@ contract TokenExchange {
     uint public bips = 10000;
 
     // liquidity rewards
-    uint private swap_fee_numerator = 5;       // TODO Part 5: Set liquidity providers' returns.
+    uint private swap_fee_numerator = 0;       // TODO Part 5: Set liquidity providers' returns.
     uint private swap_fee_denominator = 100;
     uint public pending_eth_reward = 0;
     uint public pending_token_reward = 0;
@@ -185,8 +185,8 @@ contract TokenExchange {
         */
 
         if (max_exchange_rate > 0 && min_exchange_rate > 0) {
-            require(priceToken() <= max_exchange_rate, "Max token slippage reached.");
-            require(priceToken() >= min_exchange_rate, "Min token slippage reached.");
+            require(priceToken().div(100) <= max_exchange_rate, "Max token slippage reached.");
+            require(priceToken().div(100) >= min_exchange_rate, "Min token slippage reached.");
         }
 
         require(eth_reserves >= amountETH, "eth reserves must >= amount eth");
@@ -232,7 +232,7 @@ contract TokenExchange {
 
         uint amount_eth = attempt_to_remove_all();
         removeLiquidity(amount_eth, 0, 0);
-        delete providers;
+        delete providers[0];
     }
 
     /***  Define helper functions for liquidity management here as needed: ***/
@@ -440,7 +440,6 @@ contract TokenExchange {
             emit debugValue(i, fee_lp_reward);
             total = total.add(fee_lp_reward);
         }
-        // require(total == liquidity_fee_mint, "total != liquidity_fee_mint");
 
         liquidity_amount = liquidity_amount.add(liquidity_fee_mint);
         pending_eth_reward = pending_eth_reward.add(fee);
