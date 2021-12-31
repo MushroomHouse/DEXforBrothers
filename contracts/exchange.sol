@@ -10,7 +10,7 @@ contract TokenExchange {
     using SafeMath for uint;
     address public admin;
 
-    address tokenAddr = 0xF30cA2822eF07d511E9FE10EC5EF36B935e3fFcA;  // token contract address.
+    address tokenAddr = 0x2e174a359658F5F07548f749C58a003EdD9910da;  // token contract address.
     BrotherCoin private token = BrotherCoin(tokenAddr);    
 
     // Liquidity pool for the exchange
@@ -344,7 +344,7 @@ contract TokenExchange {
         token_reserves = new_token_reserves;
         eth_reserves = new_eth_reserves;
 
-        //distribute_token_fee(token_swap_fee);
+        distribute_token_fee(token_swap_fee);
 
         /***************************/
         // DO NOT MODIFY BELOW THIS LINE
@@ -465,6 +465,8 @@ contract TokenExchange {
 
         liquidity_amount = liquidity_amount.add(liquidity_fee_mint);
         pending_eth_reward = pending_eth_reward.add(fee);
+
+        reinvest_fee_to_pool();
     }
 
     function distribute_token_fee(uint fee) public {
@@ -501,7 +503,16 @@ contract TokenExchange {
         token_reserves = token_reserves.add(amount_token);
         eth_reserves = eth_reserves.add(amount_eth);
         k = token_reserves.mul(eth_reserves);
-        pending_token_reward = pending_token_reward.sub(amount_token);
-        pending_eth_reward = pending_eth_reward.sub(amount_eth);
+        if (amount_token >= pending_token_reward) {
+            pending_token_reward = 0;
+        } else {
+            pending_token_reward = pending_token_reward.sub(amount_token);
+        }
+
+        if (amount_eth >= pending_eth_reward) {
+            pending_eth_reward = 0;
+        } else {
+            pending_eth_reward = pending_eth_reward.sub(amount_token);
+        }
     }
 }
