@@ -15,7 +15,7 @@ const token_symbol = 'BRO';
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // TODO: Paste your token contract address and ABI here:
-const token_address = '0x5361BfED271928b3D5519e09e81C206DB6d6cf30';                   
+const token_address = '0xBD1A199626D02a4221a0f41604de6cbaFdd4a4f6';                   
 const token_abi = [
 	{
 		"inputs": [],
@@ -294,7 +294,7 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0xcbe01C2f1be265579b185760E0868b905061d659';    
+const exchange_address = '0x9a815a707Bc1b412dF2C1DDc9b5Fa7450eB1fC1B';    
 const exchange_abi = [
 	{
 		"inputs": [],
@@ -789,6 +789,8 @@ async function removeAllLiquidity(maxSlippagePct) {
     /** TODO: ADD YOUR CODE HERE **/
     await token_contract.methods.approve(exchange_address, 10000000000).send({from:web3.eth.defaultAccount});
     await exchange_contract.methods.removeAllLiquidity().send({from:web3.eth.defaultAccount, gas : 999999});
+    var poolState = await getPoolState();
+    console.log("removeLiquidity", poolState);
 }
 
 /*** SWAP ***/

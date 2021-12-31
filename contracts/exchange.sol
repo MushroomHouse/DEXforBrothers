@@ -10,7 +10,7 @@ contract TokenExchange {
     using SafeMath for uint;
     address public admin;
 
-    address tokenAddr = 0x2e174a359658F5F07548f749C58a003EdD9910da;  // token contract address.
+    address tokenAddr = 0xBD1A199626D02a4221a0f41604de6cbaFdd4a4f6;  // token contract address.
     BrotherCoin private token = BrotherCoin(tokenAddr);    
 
     // Liquidity pool for the exchange
