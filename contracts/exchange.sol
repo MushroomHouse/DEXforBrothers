@@ -10,7 +10,7 @@ contract TokenExchange {
     using SafeMath for uint;
     address public admin;
 
-    address tokenAddr = 0xBD1A199626D02a4221a0f41604de6cbaFdd4a4f6;  // token contract address.
+    address tokenAddr = 0x40d799e74b7C8A12a506eBb7573c9f1eA9151A15;  // token contract address.
     BrotherCoin private token = BrotherCoin(tokenAddr);    
 
     // Liquidity pool for the exchange
@@ -233,14 +233,16 @@ contract TokenExchange {
 
         uint amount_eth = attempt_to_remove_all();
         removeLiquidity(amount_eth, 0, 0);
-        delete providers[0];
 
-        if (liquidity_amount == 0) {
+        // There is an edge case where balances are not wiped out completely
+        // we reset pool to mitigate this case.
+        if (providers.length == 1) {
             eth_reserves = 0;
             token_reserves = 0;
             pending_eth_reward = 0;
             pending_token_reward = 0;
         }
+        delete providers[0];
     }
 
     /***  Define helper functions for liquidity management here as needed: ***/

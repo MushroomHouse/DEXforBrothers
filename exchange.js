@@ -15,7 +15,7 @@ const token_symbol = 'BRO';
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // TODO: Paste your token contract address and ABI here:
-const token_address = '0xBD1A199626D02a4221a0f41604de6cbaFdd4a4f6';                   
+const token_address = '0x40d799e74b7C8A12a506eBb7573c9f1eA9151A15';                   
 const token_abi = [
 	{
 		"inputs": [],
@@ -294,7 +294,7 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0x9a815a707Bc1b412dF2C1DDc9b5Fa7450eB1fC1B';    
+const exchange_address = '0x3B8d8B7e96F73B0Cf0b88d58563D2EdBB15C6af9';    
 const exchange_abi = [
 	{
 		"inputs": [],
