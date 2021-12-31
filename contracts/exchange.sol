@@ -333,11 +333,11 @@ contract TokenExchange {
         token.transferFrom(msg.sender, address(this), amountTokens);
         payable(msg.sender).transfer(eth_swapped);
 
+        distribute_token_fee(token_swap_fee);
+
         // Update reserve pools
         token_reserves = new_token_reserves;
         eth_reserves = new_eth_reserves;
-
-        distribute_token_fee(token_swap_fee);
 
         /***************************/
         /* Check for x * y == k, assuming x and y are rounded to the nearest integer. */
@@ -416,11 +416,11 @@ contract TokenExchange {
         // send token from this contract to the caller(sender)
         token.transfer(msg.sender, token_out);
 
+        distribute_eth_fee(eth_fee);
+
         // Update reserve pools
         token_reserves = new_token_reserves;
         eth_reserves = new_eth_reserves;
-
-        distribute_eth_fee(eth_fee);
 
         /**************************/
         /* Check for x * y == k, assuming x and y are rounded to the nearest integer. */
