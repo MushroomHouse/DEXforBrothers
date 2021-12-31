@@ -27,7 +27,7 @@ contract TokenExchange {
     uint public bips = 10000;
 
     // liquidity rewards
-    uint private swap_fee_numerator = 3;       // TODO Part 5: Set liquidity providers' returns.
+    uint private swap_fee_numerator = 3;       // Set liquidity providers' returns.
     uint private swap_fee_denominator = 100;
     uint public pending_eth_reward = 0;
     uint public pending_token_reward = 0;
@@ -80,16 +80,13 @@ contract TokenExchange {
         token_reserves = amountTokens;
         k = eth_reserves.mul(token_reserves);
 
-        // TODO: Keep track of the initial liquidity added so the initial provider
+        // Keep track of the initial liquidity added so the initial provider
         //          can remove this liquidity
         liquidity_amount = msg.value;
         liquidity_by_provider[msg.sender] = msg.value;
         providers.push(msg.sender);
     }
 
-    // ============================================================
-    //                    FUNCTIONS TO IMPLEMENT
-    // ============================================================
     /* Be sure to use the SafeMath library for all operations! */
     
     // Function priceToken: Calculate the price of your token in ETH.
@@ -99,7 +96,6 @@ contract TokenExchange {
         view
         returns (uint)
     {
-        /******* TODO: Implement this function *******/
         /* HINTS:
             Calculate how much ETH is of equivalent worth based on the current exchange rate.
         */
@@ -113,7 +109,6 @@ contract TokenExchange {
         view
         returns (uint)
     {
-        /******* TODO: Implement this function *******/
         /* HINTS:
             Calculate how much of your token is of equivalent worth based on the current exchange rate.
         */
@@ -129,7 +124,6 @@ contract TokenExchange {
         external 
         payable
     {
-        /******* TODO: Implement this function *******/
         /* HINTS:
             Calculate the liquidity to be added based on what was sent in and the prices.
             If the caller possesses insufficient tokens to equal the ETH sent, then transaction must fail.
@@ -176,7 +170,6 @@ contract TokenExchange {
         public 
         payable
     {
-        /******* TODO: Implement this function *******/
         /* HINTS:
             Calculate the amount of your tokens that should be also removed.
             Transfer the ETH and Token to the provider.
@@ -233,7 +226,6 @@ contract TokenExchange {
         external
         payable
     {
-        /******* TODO: Implement this function *******/
         /* HINTS:
             Decide on the maximum allowable ETH that msg.sender can remove.
             Call removeLiquidity().
@@ -293,7 +285,6 @@ contract TokenExchange {
         external 
         payable
     {
-        /******* TODO: Implement this function *******/
         /* HINTS:
             Calculate amount of ETH should be swapped based on exchange rate.
             Transfer the ETH to the provider.
@@ -347,7 +338,6 @@ contract TokenExchange {
         distribute_token_fee(token_swap_fee);
 
         /***************************/
-        // DO NOT MODIFY BELOW THIS LINE
         /* Check for x * y == k, assuming x and y are rounded to the nearest integer. */
         // Check for Math.abs(token_reserves * eth_reserves - k) < (token_reserves + eth_reserves + 1));
         //   to account for the small decimal errors during uint division rounding.
@@ -370,7 +360,6 @@ contract TokenExchange {
         external
         payable 
     {
-        /******* TODO: Implement this function *******/
         /* HINTS:
             Calculate amount of your tokens should be swapped based on exchange rate.
             Transfer the amount of your tokens to the provider.
@@ -432,7 +421,6 @@ contract TokenExchange {
         distribute_eth_fee(eth_fee);
 
         /**************************/
-        // DO NOT MODIFY BELOW THIS LINE
         /* Check for x * y == k, assuming x and y are rounded to the nearest integer. */
         // Check for Math.abs(token_reserves * eth_reserves - k) < (token_reserves + eth_reserves + 1));
         //   to account for the small decimal errors during uint division rounding.
