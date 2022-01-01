@@ -10,7 +10,7 @@ contract TokenExchange {
     using SafeMath for uint;
     address public admin;
 
-    address tokenAddr = 0x40d799e74b7C8A12a506eBb7573c9f1eA9151A15;  // token contract address.
+    address tokenAddr = 0xb2BC8341a009b6803978b32E361567A8daE429a2;  // token contract address.
     BrotherCoin private token = BrotherCoin(tokenAddr);    
 
     // Liquidity pool for the exchange
@@ -236,13 +236,22 @@ contract TokenExchange {
 
         // There is an edge case where balances are not wiped out completely
         // we reset pool to mitigate this case.
-        if (providers.length == 1) {
-            eth_reserves = 0;
-            token_reserves = 0;
-            pending_eth_reward = 0;
-            pending_token_reward = 0;
+        // if (providers.length == 1) {
+        //     eth_reserves = 0;
+        //     token_reserves = 0;
+        //     pending_eth_reward = 0;
+        //     pending_token_reward = 0;
+        // }
+        remove_provider(0);
+    }
+    
+    function remove_provider(uint index) private {
+        if (index >= providers.length) return;
+
+        for (uint i = index; i<providers.length-1; i++){
+            providers[i] = providers[i+1];
         }
-        delete providers[0];
+        delete providers[providers.length-1];
     }
 
     /***  Define helper functions for liquidity management here as needed: ***/
@@ -487,6 +496,7 @@ contract TokenExchange {
         if (amount_token > pending_token_reward) {
             // not enough token to pair with eth
             // re-calculate eth to match our token
+            amount_token = pending_token_reward;
             amount_eth = amount_token.mul(bips).div(priceETH());
         }
 
@@ -502,7 +512,7 @@ contract TokenExchange {
         if (amount_eth >= pending_eth_reward) {
             pending_eth_reward = 0;
         } else {
-            pending_eth_reward = pending_eth_reward.sub(amount_token);
+            pending_eth_reward = pending_eth_reward.sub(amount_eth);
         }
     }
 }
