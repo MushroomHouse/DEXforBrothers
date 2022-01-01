@@ -236,12 +236,12 @@ contract TokenExchange {
 
         // There is an edge case where balances are not wiped out completely
         // we reset pool to mitigate this case.
-        // if (providers.length == 1) {
-        //     eth_reserves = 0;
-        //     token_reserves = 0;
-        //     pending_eth_reward = 0;
-        //     pending_token_reward = 0;
-        // }
+        if (providers.length == 1) {
+            eth_reserves = 0;
+            token_reserves = 0;
+            pending_eth_reward = 0;
+            pending_token_reward = 0;
+        }
         remove_provider(0);
     }
     

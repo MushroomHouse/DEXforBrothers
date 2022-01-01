@@ -15,7 +15,7 @@ const token_symbol = 'BRO';
 //         ABIs and Contract Addresses: Paste Your ABIs/Addresses Here
 // =============================================================================
 // TODO: Paste your token contract address and ABI here:
-const token_address = '0x40d799e74b7C8A12a506eBb7573c9f1eA9151A15';                   
+const token_address = '0xD195A8748ed506BB96576A457AbF980B6f43B021';                   
 const token_abi = [
 	{
 		"inputs": [],
@@ -294,7 +294,7 @@ const token_abi = [
 const token_contract = new web3.eth.Contract(token_abi, token_address);
 
 // TODO: Paste your exchange address and ABI here
-const exchange_address = '0x3B8d8B7e96F73B0Cf0b88d58563D2EdBB15C6af9';    
+const exchange_address = '0x2C6b67d9004C3EDCa26ff0557b312fd6b2ebfD04';    
 const exchange_abi = [
 	{
 		"inputs": [],
@@ -994,10 +994,8 @@ async function sanityCheck() {
     console.log("eth_reserves_final (after getting rewards)", eth_reserves_final, "eth_reserve 2", eth_reserves_2, 
         "eth_reserves_1", eth_reserves_1);
     
-    // NOTE: due to swap fee, the default check is not correct.
     // We apply pending reward only when there is a pair, so we do not violate k
-	//score += check("eth_reserves updated correctly", eth_reserves_final < eth_reserves_2);
-    score += check("eth_reserves updated correctly", eth_reserves_final > eth_reserves_2);
+	score += check("eth_reserves updated correctly", eth_reserves_final < eth_reserves_2);
 	score += check("token_reserves updated correctly", token_reserves_3 > token_reserves_2);
 	// Check tokens and ETH were actually transferred
 	var final_tokens = 	await token_contract.methods.balanceOf(web3.eth.defaultAccount).call();
